@@ -9,10 +9,21 @@
 import UIKit
 
 class ViewController: UIViewController {
-
-    var userIsTyping = false
     
-    @IBAction func touchDigit(sender: UIButton) {
+    private var userIsTyping = false
+    
+    // computed property
+    private var displayValue: Double {
+        get {
+            return Double(display.text!)!
+        }
+        set {
+            // newValue is a special keyword returning the displayValue someone set
+            display.text = String(newValue)
+        }
+    }
+    
+    @IBAction private func touchDigit(sender: UIButton) {
         let digit = sender.currentTitle!
         if userIsTyping {
             let textCurrentlyInDisplay = display.text!
@@ -24,15 +35,19 @@ class ViewController: UIViewController {
     }
     
     // optionals are always initially set to nil
-    @IBOutlet weak var display: UILabel!
+    @IBOutlet private weak var display: UILabel!
     
-    @IBAction func performOperation(sender: UIButton) {
-        userIsTyping = false
-        if let mathematicalSymbol = sender.currentTitle {
-            if mathematicalSymbol == "π" {
-                display.text = String(M_PI)
-            }
+    private var brain: CalculatorBrain = CalculatorBrain()
+    
+    @IBAction private func performOperation(sender: UIButton) {
+        if userIsTyping {
+            brain.setOperand(displayValue)
+            userIsTyping = false
         }
+        if let mathematicalSymbol = sender.currentTitle {
+            brain.performOperation(mathematicalSymbol)
+        }
+        displayValue = brain.result
     }
 }
 
