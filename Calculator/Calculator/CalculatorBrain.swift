@@ -11,9 +11,12 @@ import Foundation
 class CalculatorBrain {
     
     private var accumulator = 0.0
+    // operands as doubles and operations as strings, so [AnyObject] stores both
+    private var internalProgram = [AnyObject]()
     
     func setOperand(operand: Double) {
         accumulator = operand
+        internalProgram.append(operand)
     }
     
     private var operations: Dictionary<String, Operation> = [
@@ -65,6 +68,33 @@ class CalculatorBrain {
     private  struct PendingBinaryOperationInfo {
         var binaryFunction: (Double, Double) -> Double
         var firstOperand: Double
+    }
+    
+    typealias PropertyList = AnyObject
+    
+    // this use of a typealias is a form of documentation
+    var program: PropertyList {
+        get {
+            return internalProgram
+        }
+        set {
+            clear()
+            if let arrayOfOps = newValue as? [AnyObject] {
+                for op in arrayOfOps {
+                    if let operand = op as? Double {
+                        setOperand(operand)
+                    } else if let operation = op as? String {
+                        performOperation(operation)
+                    }
+                }
+            }
+        }
+    }
+    
+    func clear() {
+        accumulator = 0.0
+        pending = nil
+        internalProgram.removeAll()
     }
     
     // read only property, because there is no set
